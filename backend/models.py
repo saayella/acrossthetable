@@ -1,54 +1,39 @@
-from backend.app import db
+# backend/models.py
 from datetime import datetime
-
-class User(db.Model):
-    id           = db.Column(db.Integer, primary_key=True)
-    name         = db.Column(db.String(120))
-    email        = db.Column(db.String(120), unique=True)
-    password     = db.Column(db.String(120))
-    senior_icon  = db.Column(db.String(255))
-
-
-class Student(db.Model):
-    id            = db.Column(db.Integer, primary_key=True)
-    name          = db.Column(db.String(120))
-    email         = db.Column(db.String(120), unique=True)
-    student_icon  = db.Column(db.String(255))
-
+from backend.app import db
 
 class Table(db.Model):
-    id            = db.Column(db.Integer, primary_key=True)
-    user_id       = db.Column(db.Integer, db.ForeignKey('user.id'))
-    student_id    = db.Column(db.Integer, db.ForeignKey('student.id'))
+    __tablename__ = 'table'
+    id          = db.Column(db.Integer, primary_key=True)
+    theme       = db.Column(db.String(100), nullable=False)
+    topic       = db.Column(db.String(100), nullable=False)
+    tagline     = db.Column(db.String(200), nullable=False)
+    time        = db.Column(db.String(50),  nullable=False)
+    date        = db.Column(db.String(50),  nullable=False)
+    table_image = db.Column(db.String(200), nullable=False)
+    student    = db.Column(db.String(100), nullable=False)
+    student_image = db.Column(db.String(200), nullable=True)
 
-    theme         = db.Column(db.String(100))
-    topic         = db.Column(db.Text)
-    tagline       = db.Column(db.String(255))
-    time          = db.Column(db.String(50))
-    date          = db.Column(db.String(50))
-    table_image   = db.Column(db.String(255))
-
-    user          = db.relationship('User', backref='tables')
-    student       = db.relationship('Student', backref='tables')
-
-
+# models.py
 class Booking(db.Model):
-    id            = db.Column(db.Integer, primary_key=True)
-    table_id      = db.Column(db.Integer, db.ForeignKey('table.id'), nullable=False)
-    user_id       = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    timestamp     = db.Column(db.DateTime, default=datetime.utcnow)
-
-    table         = db.relationship('Table', backref='bookings')
-    user          = db.relationship('User', backref='bookings')
+    __tablename__ = 'booking'
+    id         = db.Column(db.Integer, primary_key=True)
+    table_id   = db.Column(db.Integer, db.ForeignKey('table.id'), nullable=False)
+    timestamp  = db.Column(db.DateTime, default=datetime.utcnow)
+    table      = db.relationship('Table')  # <-- Ensure this line is here
 
     def to_dict(self):
         return {
-            "id":           self.id,
-            "table_id":     self.table_id,
-            "theme":        self.table.theme,
-            "tagline":      self.table.tagline,
-            "time":         self.table.time,
-            "date":         self.table.date,
-            "table_image":  self.table.table_image,
-            "booked_at":    self.timestamp.isoformat()
+            'id': self.id,
+            'table_id': self.table_id,
+            'theme': self.table.theme,
+            'topic': self.table.topic,
+            'time': self.table.time,
+            'date': self.table.date,
+            'tagline': self.table.tagline,
+            'student': self.table.student,
+            'table_image': self.table.table_image,
+            'start_time': self.table.start_time if hasattr(self.table, 'start_time') else None,
+            'video_link': self.table.video_link if hasattr(self.table, 'video_link') else None
         }
+
